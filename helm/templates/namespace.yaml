@@ -4,4 +4,3 @@ metadata:
   name: {{ .Values.app.namespace }}
   labels:
     app: {{ .Values.app.name }}
-    env: {{ .Values.app.env }}

@@ -5,7 +5,6 @@ metadata:
   namespace: {{ .Values.app.namespace }}
   labels:
     app: {{ .Values.app.name }}
-    env: {{ .Values.app.env }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -20,7 +19,6 @@ spec:
     metadata:
       labels:
         app: {{ .Values.app.name }}
-        env: {{ .Values.app.env }}
     spec:
       serviceAccountName: {{ .Values.app.name }}
       {{- with .Values.securityContext }}

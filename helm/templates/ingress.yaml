@@ -6,7 +6,6 @@ metadata:
   namespace: {{ .Values.app.namespace }}
   labels:
     app: {{ .Values.app.name }}
-    env: {{ .Values.app.env }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}

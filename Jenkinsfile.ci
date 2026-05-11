@@ -33,6 +33,7 @@ pipeline {
             steps {
                 sh '''
                     docker build \
+                        -f docker/embedded/Dockerfile \
                         -t ${IMAGE_NAME}:${BUILD_NUMBER} \
                         -t ${IMAGE_NAME}:latest \
                         .
