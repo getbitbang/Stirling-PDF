@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            yaml readFile('automation/build-pod-cd.yaml')
+            yamlFile 'automation/build-pod-cd.yaml'
             defaultContainer 'helm'
         }
     }
