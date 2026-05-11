@@ -41,10 +41,7 @@ envs:
     value: "PDF Editor"
 
 persistence:
-  enabled: true
-  storageClass: nfs-client
-  accessMode: ReadWriteOnce
-  size: 5Gi
+  enabled: false
 
 securityContext:
   fsGroup: 1000

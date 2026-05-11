@@ -1,22 +1,34 @@
 ## Task
-Delete one file from the Helm templates.
+Update one field in `helm/values.yaml`.
 
 ## The fix
-Delete `helm/templates/namespace.yaml` entirely.
+Set `persistence.enabled` to `false`.
+
+Find this block in `helm/values.yaml`:
+
+```yaml
+persistence:
+  enabled: true
+  storageClass: nfs-client
+  accessMode: ReadWriteOnce
+  size: 5Gi
+```
+
+Replace it with:
+
+```yaml
+persistence:
+  enabled: false
+```
+
+Remove the storageClass, accessMode, and size lines entirely.
 
 ## Why
-The Helm chart tries to create the `stirling-pdf` namespace as a
-Helm-managed resource via this template. But the namespace already
-exists outside Helm's control, so Helm errors with:
+The previous failed Helm run left a partial release registered. Helm's
+upgrade is now failing because it expects a PVC named
+`stirling-pdf-data` that doesn't exist yet. Stirling-PDF is a stateless
+tool — it processes PDFs in memory and returns them immediately, nothing
+is stored between requests. Persistence is not needed.
 
-  "namespaces stirling-pdf already exists"
-
-The `--create-namespace` flag already present on the `helm upgrade
---install` command in Jenkinsfile.cd handles namespace creation
-correctly — it creates the namespace if missing and skips it silently
-if it already exists. The template is redundant and must be removed.
-
-## Exact action
-Delete the file: `helm/templates/namespace.yaml`
-
-No other files need to change.
+## Do not touch
+All other files are correct — leave them as-is.
