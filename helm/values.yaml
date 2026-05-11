@@ -1,0 +1,66 @@
+app:
+  name: stirling-pdf
+  namespace: stirling-pdf
+
+image:
+  registry: 192.168.8.72:32083
+  name: stirling-pdf
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  host: pdf-editor.getbitbang.com
+  annotations: {}
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+# Stirling-PDF configuration via environment variables
+# Full reference: https://docs.stirlingpdf.com/Configuration
+envs:
+  - name: SYSTEM_MAXFILESIZE
+    value: "100"
+  - name: SECURITY_ENABLELOGIN
+    value: "false"
+  - name: UI_APPNAME
+    value: "BitBang PDF Editor"
+  - name: UI_APPNAMENAVBAR
+    value: "PDF Editor"
+
+persistence:
+  enabled: true
+  storageClass: nfs-client
+  accessMode: ReadWriteOnce
+  size: 5Gi
+
+securityContext:
+  fsGroup: 1000
+
+serviceAccount:
+  create: true
+  automountServiceAccountToken: false
+
+probes:
+  liveness:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 5
+  readiness:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 5

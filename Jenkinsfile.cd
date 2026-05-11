@@ -1,0 +1,106 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml readFile('automation/build-pod-cd.yaml')
+            defaultContainer 'helm'
+        }
+    }
+
+    parameters {
+        choice(
+            name: 'ACTION',
+            choices: ['deploy', 'rollback'],
+            description: 'Action to perform'
+        )
+        string(
+            name: 'IMAGE_TAG',
+            defaultValue: 'latest',
+            description: 'Docker image tag to deploy (default: latest)'
+        )
+    }
+
+    environment {
+        APP_NAME       = 'stirling-pdf'
+        NEXUS_REGISTRY = '192.168.8.72:32083'
+        NAMESPACE      = 'stirling-pdf'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                script {
+                    echo "Action : ${params.ACTION}"
+                    echo "Tag    : ${params.IMAGE_TAG}"
+                }
+            }
+        }
+
+        stage('Deploy') {
+            when {
+                expression { params.ACTION == 'deploy' }
+            }
+            steps {
+                sh """
+                    helm upgrade --install ${APP_NAME} ./helm \
+                        --namespace ${NAMESPACE} \
+                        --create-namespace \
+                        --values helm/values.yaml \
+                        --set image.tag=${params.IMAGE_TAG} \
+                        --wait \
+                        --timeout 5m
+                """
+            }
+        }
+
+        stage('Rollback') {
+            when {
+                expression { params.ACTION == 'rollback' }
+            }
+            steps {
+                sh """
+                    helm rollback ${APP_NAME} \
+                        --namespace ${NAMESPACE} \
+                        --wait \
+                        --timeout 5m
+                """
+            }
+        }
+
+        stage('Verify') {
+            steps {
+                container('kubectl') {
+                    sh """
+                        echo "=== Deployment Status ==="
+                        kubectl rollout status deployment/${APP_NAME} \
+                            -n ${NAMESPACE} --timeout=3m
+
+                        echo ""
+                        echo "=== Pods ==="
+                        kubectl get pods -n ${NAMESPACE} -l app=${APP_NAME}
+
+                        echo ""
+                        echo "=== Ingress ==="
+                        kubectl get ingress -n ${NAMESPACE}
+                    """
+                }
+            }
+        }
+
+        stage('Summary') {
+            steps {
+                script {
+                    def action = params.ACTION == 'deploy' ? '✅ Deployed' : '♻️ Rolled back'
+                    echo "${action}: ${APP_NAME}"
+                    echo "URL: https://pdf-editor.getbitbang.com"
+                }
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "❌ CD pipeline failed for ${APP_NAME}"
+        }
+    }
+}

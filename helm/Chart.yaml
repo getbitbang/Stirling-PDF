@@ -1,0 +1,13 @@
+apiVersion: v2
+name: stirling-pdf
+description: Stirling PDF - Self-hosted PDF editor deployed via BitBang framework
+type: application
+version: 0.1.0
+appVersion: "latest"
+keywords:
+  - pdf
+  - tools
+  - stirling
+home: https://github.com/Stirling-Tools/Stirling-PDF
+sources:
+  - https://github.com/getbitbang/Stirling-PDF

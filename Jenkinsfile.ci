@@ -1,0 +1,69 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml readFile('automation/build-pod-ci.yaml')
+            defaultContainer 'docker'
+        }
+    }
+
+    environment {
+        NEXUS_REGISTRY    = '192.168.8.72:32083'
+        IMAGE_NAME        = '192.168.8.72:32083/stirling-pdf'
+        NEXUS_CREDENTIALS = credentials('nexus-docker')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                sh '''
+                    docker login ${NEXUS_REGISTRY} \
+                        -u ${NEXUS_CREDENTIALS_USR} \
+                        -p ${NEXUS_CREDENTIALS_PSW}
+                '''
+            }
+        }
+
+        stage('Build Image') {
+            steps {
+                sh '''
+                    docker build \
+                        -t ${IMAGE_NAME}:${BUILD_NUMBER} \
+                        -t ${IMAGE_NAME}:latest \
+                        .
+                '''
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                sh '''
+                    docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+                    docker push ${IMAGE_NAME}:latest
+                '''
+            }
+        }
+
+        stage('Summary') {
+            steps {
+                echo "✅ Build complete"
+                echo "   Image : ${IMAGE_NAME}:${BUILD_NUMBER}"
+                echo "   Latest: ${IMAGE_NAME}:latest"
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker logout ${NEXUS_REGISTRY} || true'
+        }
+        failure {
+            echo "❌ CI pipeline failed for stirling-pdf"
+        }
+    }
+}
