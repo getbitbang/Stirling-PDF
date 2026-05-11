@@ -65,8 +65,10 @@ probes:
     periodSeconds: 15
     timeoutSeconds: 10
     failureThreshold: 5
+    path: /actuator/health
   readiness:
     initialDelaySeconds: 60
     periodSeconds: 15
     timeoutSeconds: 10
     failureThreshold: 5
+    path: /actuator/health

@@ -39,7 +39,7 @@ spec:
           {{- end }}
           livenessProbe:
             httpGet:
-              path: /
+              path: {{ .Values.probes.liveness.path | default "/" }}
               port: http
               scheme: HTTP
             initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
@@ -48,7 +48,7 @@ spec:
             failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
           readinessProbe:
             httpGet:
-              path: /
+              path: {{ .Values.probes.readiness.path | default "/" }}
               port: http
               scheme: HTTP
             initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
