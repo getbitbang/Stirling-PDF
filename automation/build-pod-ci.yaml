@@ -10,6 +10,9 @@ spec:
       image: docker:27-dind
       securityContext:
         privileged: true
+      args:
+        - "--insecure-registry=192.168.8.72:32083"
+        - "--insecure-registry=192.168.8.72:32084"
       env:
         - name: DOCKER_TLS_CERTDIR
           value: ""
