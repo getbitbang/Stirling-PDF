@@ -23,14 +23,16 @@ ingress:
 resources:
   requests:
     cpu: 200m
-    memory: 512Mi
-  limits:
-    cpu: 1000m
     memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 2Gi
 
 # Stirling-PDF configuration via environment variables
 # Full reference: https://docs.stirlingpdf.com/Configuration
 envs:
+  - name: JAVA_TOOL_OPTIONS
+    value: "-XX:MaxMetaspaceSize=256m -Xms256m -Xmx1g"
   - name: SYSTEM_MAXFILESIZE
     value: "100"
   - name: SECURITY_ENABLELOGIN
