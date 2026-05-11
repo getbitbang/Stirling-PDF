@@ -33,17 +33,24 @@ resources:
 envs:
   - name: JAVA_TOOL_OPTIONS
     value: "-XX:MaxMetaspaceSize=256m -Xms256m -Xmx1g"
+  - name: DISABLE_ADDITIONAL_FEATURES
+    value: "false"
+  - name: SECURITY_ENABLELOGIN
+    value: "true"
+  - name: SECURITY_JWT_PERSISTENCE
+    value: "true"
   - name: SYSTEM_MAXFILESIZE
     value: "100"
-  - name: SECURITY_ENABLELOGIN
-    value: "false"
   - name: UI_APPNAME
     value: "BitBang PDF Editor"
   - name: UI_APPNAMENAVBAR
     value: "PDF Editor"
 
 persistence:
-  enabled: false
+  enabled: true
+  storageClass: nfs-client
+  accessMode: ReadWriteOnce
+  size: 2Gi
 
 securityContext:
   fsGroup: 1000
