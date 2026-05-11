@@ -1,37 +1,21 @@
 ## Task
-Update `automation/build-pod-ci.yaml` — add `--insecure-registry` args to the docker container.
+Update `automation/build-pod-cd.yaml` — fix the kubectl image tag.
 
 ## The fix
-The DinD container runs its own isolated Docker daemon that defaults to HTTPS for all
-registries. Our Nexus registry at 192.168.8.72:32083 is HTTP only. The worker nodes
-already have it configured as an insecure registry in their daemon.json, but that config
-does not carry into the DinD pod. We need to pass the flag directly to dockerd via `args`.
+`bitnami/kubectl:1.35.0` does not exist on Docker Hub. Bitnami's kubectl
+images only go up to 1.31. Change the tag to `1.31` — kubectl version
+does not need to exactly match the cluster; within one minor version is
+fully supported (1.31 client talking to 1.35 cluster is fine).
 
 ## Exact change needed
 
-Find the `docker` container in `automation/build-pod-ci.yaml` and add an `args` block
-immediately after `securityContext`, before `env`:
+Find the `kubectl` container in `automation/build-pod-cd.yaml` and change
+the image tag from `1.35.0` to `1.31`:
 
 ```yaml
-      args:
-        - "--insecure-registry=192.168.8.72:32083"
-        - "--insecure-registry=192.168.8.72:32084"
-```
-
-The result should look exactly like this:
-
-```yaml
-    - name: docker
-      image: docker:27-dind
-      securityContext:
-        privileged: true
-      args:
-        - "--insecure-registry=192.168.8.72:32083"
-        - "--insecure-registry=192.168.8.72:32084"
-      env:
-        - name: DOCKER_TLS_CERTDIR
-          value: ""
+    - name: kubectl
+      image: bitnami/kubectl:1.31
 ```
 
 No other files need to change. Do not touch Jenkinsfile.ci, Jenkinsfile.cd,
-build-pod-cd.yaml, or any Helm files.
+build-pod-ci.yaml, or any Helm files.
