@@ -69,21 +69,19 @@ pipeline {
 
         stage('Verify') {
             steps {
-                container('kubectl') {
-                    sh """
-                        echo "=== Deployment Status ==="
-                        kubectl rollout status deployment/${APP_NAME} \
-                            -n ${NAMESPACE} --timeout=3m
+                sh """
+                    echo "=== Deployment Status ==="
+                    kubectl rollout status deployment/${APP_NAME} \
+                        -n ${NAMESPACE} --timeout=3m
 
-                        echo ""
-                        echo "=== Pods ==="
-                        kubectl get pods -n ${NAMESPACE} -l app=${APP_NAME}
+                    echo ""
+                    echo "=== Pods ==="
+                    kubectl get pods -n ${NAMESPACE} -l app=${APP_NAME}
 
-                        echo ""
-                        echo "=== Ingress ==="
-                        kubectl get ingress -n ${NAMESPACE}
-                    """
-                }
+                    echo ""
+                    echo "=== Ingress ==="
+                    kubectl get ingress -n ${NAMESPACE}
+                """
             }
         }
 
